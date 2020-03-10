@@ -1,3 +1,39 @@
+# 1.0.0-rc.17 (2020-02-23)
+
+
+### Bug Fixes
+
+* **ngrid/clipboard:** copy rows in logical order ([be53250](https://github.com/shlomiassaf/ngrid/commit/be53250))
+
+
+
+# 1.0.0-rc.16 (2020-01-16)
+
+
+### Bug Fixes
+
+* **ngrid:** document.contains fails on IE ([bdc4b10](https://github.com/shlomiassaf/ngrid/commit/bdc4b10))
+
+
+
+# 1.0.0-rc.15 (2020-01-16)
+
+
+### Bug Fixes
+
+* **ngrid:** breaking change in cdk/drag ([7c9e4fe](https://github.com/shlomiassaf/ngrid/commit/7c9e4fe))
+
+
+
+# 1.0.0-rc.14 (2020-01-16)
+
+
+### Bug Fixes
+
+* **ngrid:** unable to use cdk-drag with ngrid ([20250cb](https://github.com/shlomiassaf/ngrid/commit/20250cb)), closes [#72](https://github.com/shlomiassaf/ngrid/issues/72)
+
+
+
 # 1.0.0-rc.13 (2019-12-10)
 
 
