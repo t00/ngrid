@@ -15,6 +15,7 @@ import {
   OnInit,
   ViewContainerRef,
   NgZone,
+  QueryList,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 
@@ -30,16 +31,13 @@ import {
   CdkDropList,
   CDK_DRAG_CONFIG,
   DragRefConfig,
-  DragDropRegistry,
 } from '@angular/cdk/drag-drop';
-import { ViewportRuler } from '@angular/cdk/scrolling';
 
-import { PblNgridComponent, NgridPlugin, PblColumn, PblNgridPluginController, PblNgridCellContext } from '@pebula/ngrid';
-import { cdkDropList, cdkDrag } from '../v7-compat';
-import { CdkLazyDropList, CdkLazyDrag, PblDragDrop } from '../core';
+import { PblNgridComponent, PblColumn, PblNgridPluginController, PblNgridCellContext } from '@pebula/ngrid';
+import { PblDragDrop } from '../core/drag-drop';
+import { CdkLazyDropList, CdkLazyDrag } from '../core/lazy-drag-drop';
 import { PblDropListRef } from '../core/drop-list-ref';
 import { PblDragRef } from '../core/drag-ref';
-import { extendGrid } from './extend-grid';
 
 declare module '@pebula/ngrid/lib/ext/types' {
   interface PblNgridPluginExtension {
@@ -47,11 +45,10 @@ declare module '@pebula/ngrid/lib/ext/types' {
   }
 }
 
-export const PLUGIN_KEY: 'columnReorder' = 'columnReorder';
+export const COL_REORDER_PLUGIN_KEY: 'columnReorder' = 'columnReorder';
 
 let _uniqueIdCounter = 0;
 
-@NgridPlugin({ id: PLUGIN_KEY, runOnce: extendGrid })
 @Directive({
   selector: 'pbl-ngrid[columnReorder]',
   exportAs: 'pblNgridColumnReorder',
@@ -88,6 +85,8 @@ export class PblNgridColumnReorderPluginDirective<T = any> extends CdkDropList<T
 
   @Output('cdkDropDragging') dragging: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
+  _draggables: QueryList<CdkDrag>;
+
   private _columnReorder = false;
   private _manualOverride = false;
   private _removePlugin: (table: PblNgridComponent<any>) => void;
@@ -108,12 +107,9 @@ export class PblNgridColumnReorderPluginDirective<T = any> extends CdkDropList<T
               dragDrop: DragDrop,
               changeDetectorRef: ChangeDetectorRef,
               @Optional() dir?: Directionality,
-              @Optional() @SkipSelf() group?: CdkDropListGroup<CdkDropList>,
-              @Optional() dragDropRegistry?: DragDropRegistry<any, any>, // for v7 compat
-              @Optional() @Inject(DOCUMENT) _document?: any) {
-    super(...cdkDropList(element, dragDrop, changeDetectorRef, dir, group, dragDropRegistry, _document));
-     // super(element, dragDrop, changeDetectorRef, dir, group);
-    this._removePlugin = pluginCtrl.setPlugin(PLUGIN_KEY, this);
+              @Optional() @SkipSelf() group?: CdkDropListGroup<CdkDropList>) {
+    super(element, dragDrop, changeDetectorRef, dir, group);
+    this._removePlugin = pluginCtrl.setPlugin(COL_REORDER_PLUGIN_KEY, this);
 
     this.directContainerElement = '.pbl-ngrid-header-row-main';
     this.dropped.subscribe( (event: CdkDragDrop<T, any>) => {
@@ -265,7 +261,7 @@ export class PblNgridColumnDragDirective<T = any> extends CdkDrag<T> implements 
     this._context = value;
     this.column = value && value.col;
     const pluginCtrl = this.pluginCtrl = value && PblNgridPluginController.find(value.grid);
-    const plugin = pluginCtrl && pluginCtrl.getPlugin(PLUGIN_KEY);
+    const plugin = pluginCtrl && pluginCtrl.getPlugin(COL_REORDER_PLUGIN_KEY);
     this.cdkDropList = plugin || undefined;
     this.disabled = this.column && this.column.reorder ? false : true;
   }
@@ -284,22 +280,18 @@ export class PblNgridColumnDragDirective<T = any> extends CdkDrag<T> implements 
               @Inject(CDK_DRAG_CONFIG) config: DragRefConfig,
               _dir: Directionality,
               dragDrop: DragDrop,
-              _changeDetectorRef: ChangeDetectorRef,
-
-              @Optional() viewportRuler: ViewportRuler, // for v7 compat
-              @Optional() dragDropRegistry: DragDropRegistry<any, any>,) {
-    super(...cdkDrag(element, dropContainer, _document, _ngZone, _viewContainerRef, config, _dir, dragDrop, _changeDetectorRef, viewportRuler, dragDropRegistry));
-    // super(
-    //   element,
-    //   dropContainer,
-    //   _document,
-    //   _ngZone,
-    //   _viewContainerRef,
-    //   config,
-    //   _dir,
-    //   dragDrop,
-    //   _changeDetectorRef,
-    // );
+              _changeDetectorRef: ChangeDetectorRef) {
+    super(
+      element,
+      dropContainer,
+      _document,
+      _ngZone,
+      _viewContainerRef,
+      config,
+      _dir,
+      dragDrop,
+      _changeDetectorRef,
+    );
   }
 
   /* CdkLazyDrag start */

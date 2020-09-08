@@ -1,3 +1,45 @@
+# 2.0.0-rc.2 (2020-04-21)
+
+
+### Refactor
+
+* **ngrid:** remove UnRx as decorator (fixes [#92](https://github.com/shlomiassaf/ngrid/issues/92)) ([733cf71](https://github.com/shlomiassaf/ngrid/commit/733cf71))
+* **ngrid:** dont use decorators for NgridPlugin (fixes [#92](https://github.com/shlomiassaf/ngrid/issues/92)) ([703b4b3](https://github.com/shlomiassaf/ngrid/commit/703b4b3))
+
+### BREAKING CHANGES
+
+* **ngrid:** If you created a custom plugin which required registration, registration is not longer supported using decorators. Instead, register using the ngridPlugin method.
+
+
+
+# 2.0.0-rc.1 (2020-03-15)
+
+
+### Bug Fixes
+
+* **ngrid:** allow running in ViewEngine mode (fixes [#84](https://github.com/shlomiassaf/ngrid/issues/84)) ([#86](https://github.com/shlomiassaf/ngrid/issues/86)) ([fad8409](https://github.com/shlomiassaf/ngrid/commit/fad8409))
+* **ngrid/drag:** fully implement interface ([66f896b](https://github.com/shlomiassaf/ngrid/commit/66f896b))
+
+
+
+# 2.0.0-rc.0 (2020-03-13)
+
+
+### Features
+
+* **ngrid:** support angular 9 (#79) ([9f80f9e](https://github.com/shlomiassaf/ngrid/commit/9f80f9e))
+
+
+
+# 1.0.0-rc.20 (2020-03-03)
+
+
+### Bug Fixes
+
+* **ngrid/drag:** sneaky issue with PblDragDrop and AOT ([5eb6929](https://github.com/shlomiassaf/ngrid/commit/5eb6929))
+
+
+
 # 1.0.0-rc.17 (2020-02-23)
 
 

@@ -9,6 +9,7 @@ import {
   SkipSelf,
   ViewContainerRef,
   NgZone,
+  QueryList,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 
@@ -18,15 +19,12 @@ import {
   DragDrop,
   CdkDropList,
   CdkDropListGroup,
-  DragDropRegistry,
   CdkDrag,
   CDK_DROP_LIST,
   CDK_DRAG_CONFIG, DragRefConfig, CdkDragDrop, CdkDragStart
 } from '@angular/cdk/drag-drop';
-import { ViewportRuler } from '@angular/cdk/scrolling';
 
-import { PblNgridComponent, NgridPlugin, PblNgridPluginController, PblNgridCellContext } from '@pebula/ngrid';
-import { cdkDropList, cdkDrag } from '../v7-compat';
+import { PblNgridComponent, PblNgridPluginController, PblNgridCellContext } from '@pebula/ngrid';
 import { CdkLazyDropList, CdkLazyDrag } from '../core/lazy-drag-drop';
 import { PblDropListRef } from '../core/drop-list-ref';
 import { PblDragRef } from '../core/drag-ref';
@@ -38,11 +36,10 @@ declare module '@pebula/ngrid/lib/ext/types' {
   }
 }
 
-const PLUGIN_KEY: 'rowReorder' = 'rowReorder';
+export const ROW_REORDER_PLUGIN_KEY: 'rowReorder' = 'rowReorder';
 
 let _uniqueIdCounter = 0;
 
-@NgridPlugin({ id: PLUGIN_KEY })
 @Directive({
   selector: 'pbl-ngrid[rowReorder]',
   exportAs: 'pblNgridRowReorder',
@@ -72,6 +69,8 @@ export class PblNgridRowReorderPluginDirective<T = any> extends CdkDropList<T> i
     this._rowReorder = value;
   }
 
+  _draggables: QueryList<CdkDrag>;
+
   private _rowReorder = false;
   private _removePlugin: (grid: PblNgridComponent<any>) => void;
 
@@ -81,12 +80,9 @@ export class PblNgridRowReorderPluginDirective<T = any> extends CdkDropList<T> i
               dragDrop: DragDrop,
               changeDetectorRef: ChangeDetectorRef,
               @Optional() dir?: Directionality,
-              @Optional() @SkipSelf() group?: CdkDropListGroup<CdkDropList>,
-              @Optional() dragDropRegistry?: DragDropRegistry<any, any>, // for v7 compat
-              @Optional() @Inject(DOCUMENT) _document?: any) {
-    super(...cdkDropList(element, dragDrop, changeDetectorRef, dir, group, dragDropRegistry, _document));
-    // super(element, dragDrop, changeDetectorRef, dir, group);
-    this._removePlugin = pluginCtrl.setPlugin(PLUGIN_KEY, this);
+              @Optional() @SkipSelf() group?: CdkDropListGroup<CdkDropList>) {
+    super(element, dragDrop, changeDetectorRef, dir, group);
+    this._removePlugin = pluginCtrl.setPlugin(ROW_REORDER_PLUGIN_KEY, this);
 
     this.dropped.subscribe( (event: CdkDragDrop<T>) => {
       const item = event.item as PblNgridRowDragDirective<T>;
@@ -146,7 +142,7 @@ export class PblNgridRowDragDirective<T = any> extends CdkDrag<T> implements Cdk
     this._context = value;
 
     const pluginCtrl = this.pluginCtrl = value && PblNgridPluginController.find(value.grid);
-    const plugin = pluginCtrl && pluginCtrl.getPlugin(PLUGIN_KEY);
+    const plugin = pluginCtrl && pluginCtrl.getPlugin(ROW_REORDER_PLUGIN_KEY);
     this.cdkDropList = plugin || undefined;
   }
 
@@ -176,22 +172,18 @@ export class PblNgridRowDragDirective<T = any> extends CdkDrag<T> implements Cdk
               @Inject(CDK_DRAG_CONFIG) config: DragRefConfig,
               _dir: Directionality,
               dragDrop: DragDrop,
-              _changeDetectorRef: ChangeDetectorRef,
-
-              @Optional() viewportRuler: ViewportRuler, // for v7 compat
-              @Optional() dragDropRegistry: DragDropRegistry<any, any>,) {
-    super(...cdkDrag(element, dropContainer, _document, _ngZone, _viewContainerRef, config, _dir, dragDrop, _changeDetectorRef, viewportRuler, dragDropRegistry));
-    // super(
-    //   element,
-    //   dropContainer,
-    //   _document,
-    //   _ngZone,
-    //   _viewContainerRef,
-    //   config,
-    //   _dir,
-    //   dragDrop,
-    //   _changeDetectorRef,
-    // );
+              _changeDetectorRef: ChangeDetectorRef) {
+    super(
+      element,
+      dropContainer,
+      _document,
+      _ngZone,
+      _viewContainerRef,
+      config,
+      _dir,
+      dragDrop,
+      _changeDetectorRef,
+    );
 
     this.started.subscribe( (event: CdkDragStart) => {
       const { col, row, grid, value }  = this._context;
